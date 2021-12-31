@@ -2,13 +2,13 @@ import enchant
 import os
 
 """
-    Class that defines InvalidInputError exception
+    InvalidInputError exception
 """
 class InvalidInputError(Exception):
     """
-        Exception raised for invalid input provided by user
+        Exception raised for invalid word provided by user
     """
-    def __init__(self, message="Please provide a valid input"):
+    def __init__(self, message="Invalid response provided by user. Must be 'yes' 'no' 'y' or 'n'."):
         self.message = message
         super().__init__(self.message)
 
@@ -16,7 +16,7 @@ class InvalidWordError(Exception):
     """
         Exception raised for invalid word provided by user
     """
-    def __init__(self, message="Please provide a real word"):
+    def __init__(self, message="Invalid word was provied by the user"):
         self.message = message
         super().__init__(self.message)
 
@@ -52,33 +52,57 @@ def get_players():
 
 """
     Player (key) plays their word which is appended to the word list (value) 
-    in player_to_words dict
+    in player_to_words dict. First, validates the input is valide (all alpha
+    charachters) with validate_input(), then checks the word is a valid US 
+    English word with PyEnchant (spellcheck object)
 """
 def play_word(player):
+    word = validate_input(player)
+    #handles if the word is not a valid US English word. If not, recursively run play_word()
     try:
-        word = input(f"{player}'s turn. Please input a word: ")
         if spellcheck.check(word) == True:
+            #handles KeyError if the list is initially empty
             try:
-                player_to_words[player].append(word)
+                final_word = word
+                player_to_words[player].append(final_word)
             except KeyError:
                 player_to_words[player] = []
-                player_to_words[player].append(word)
+                player_to_words[player].append(final_word)
         else:
             raise InvalidWordError
     except InvalidWordError:
         print()
         print(f"Invalid word! Must be a valid word from the English dictionary. Try again, {player}.", end="\n\n")
         play_word(player)
-    except ValueError:
-        print(f"String can't be empty!  Try again, {player}.", end="\n\n")
-        play_word(player)
+
+
+"""
+    Validates the input provided by the player doesn't contain any numbers
+"""
+def validate_input(player):
+    while True:
+        word = input(f"{player}'s turn. Please input a word: ")
+        not_alpha = False
+        for letter in word:
+            if not(letter.isalpha()):
+                if not(letter == " "):
+                    print(f"Word can only contain letters. Try again, {player}!", end="\n\n")
+                    not_alpha = True
+                    break
+        if not_alpha == True:
+            continue
+        elif len(word) == 0:
+            print(f"No word was provided. Try again, {player}!", end="\n\n")
+            continue
+        return word
+
 
 """ 
     Scores point total for the input word. Iterates through each letter 
     and adds score (value) of the letter (key) from dict 'letter_to_points'.
     Returns the point_total.
     Used by update_point_totals().
-"""
+"""       
 def score_word(word):
     point_total = 0
     for letter in word.upper():
@@ -149,9 +173,17 @@ def end_game():
     if len(winners) > 1 and player_to_points[winners[0]] == highest_score:
         print(f"It's a tie! ", end = "")
         if len(winners) == 2:
-            print("both win!! Thanks for playing!")
+            print(f"{winners[0]} and {winners[1]} both win!! Thanks for playing!")
         elif len(winners) >= 2:
-            print("all win!! Thanks for playing")
+            winners_string = ""
+            for winner in winners:
+                if winners[-1] == winner:
+                    winners_string += winner
+                elif winners[-2] == winner:
+                    winners_string += (winner + " and ")
+                else:
+                    winners_string += (winner + ", ")
+            print(f"{winners_string} all win!! Thanks for playing")
     else:
         print(f"{winners[0]} wins!! Thanks for playing!")
 
@@ -176,14 +208,13 @@ def another_round():
 
 def start_game():
     print()
-    print("""############################
-Welcome to Scrabble Scorer!!
-############################
-""")
+    print("""############################""")
+    print("""Welcome to Scrabble Scorer!!""")
+    print("""############################""")
+    print()
 
     #Populate players list
     get_players()
-
 
     #Welcome players to the game
     print()
