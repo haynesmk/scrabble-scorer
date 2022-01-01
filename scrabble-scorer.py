@@ -111,18 +111,18 @@ def spell_check(original_word, player):
 """
 def get_blanks(word, player):
     if " " in word:
-        result = {}
-        #keeps track of letter position in word
-        word_count = 0
-        #keeps track of letter position in blank_letters
-        blank_count = 0
-        #keeps track of blank tile letters in order they appear
-        blank_letters = ""
-        #create list from word to allow changing letters for blanks
-        letters = list(word)
-        #Checks if each blank letter provided is valid and if the number of letters provided by the user 
-        # equal the amount of blank tiles played
         while True:
+            result = {}
+            #keeps track of letter position in word
+            word_count = 0
+            #keeps track of letter position in blank_letters
+            blank_count = 0
+            #keeps track of blank tile letters in order they appear
+            blank_letters = ""
+            #create list from word to allow changing letters for blanks
+            letters = list(word)
+            #Checks if each blank letter provided is valid and if the number of letters provided by the user 
+            # equal the amount of blank tiles played
             while True:
                 try:
                     blank_letters = input(f"{player}, please enter your blank tile values in the order the appear in the word. No spaces between the letters: ")
@@ -149,7 +149,10 @@ def get_blanks(word, player):
                     # updating the score
                     print()
                     return result
+                else:
+                    raise IndexError
             except IndexError:
+                print()
                 print(f"Invalid number of blank tile values provided. Must equal the number of blank tiles used. Try again, {player}!", end="\n\n")
                 continue
     #If there are no blanks, return the original word: "" (empty string for no blank values)
@@ -203,7 +206,6 @@ def update_point_totals():
 def play_round():
     for player in players:
         play_word(player)
-    print()
     print("Current score: ")
     update_point_totals()
     print(player_to_points, end="\n\n")
@@ -257,6 +259,7 @@ def another_round():
     try:
         another_round_prompt = input("Would you like to play another round? ").lower()
         if another_round_prompt == "yes" or another_round_prompt == "y":
+            print()
             play_round()
         elif another_round_prompt == "no" or another_round_prompt == "n":
             end_game()
