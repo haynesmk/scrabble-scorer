@@ -6,8 +6,10 @@ from scrabble_scorer import start_game, another_game
 def main():
     while True:
         start_game()
-        another_game()
-        break
+        if another_game() == True:
+            continue
+        else:
+            break
 
 if __name__ == "__main__":
     main()

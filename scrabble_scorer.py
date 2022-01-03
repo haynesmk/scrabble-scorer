@@ -1,5 +1,4 @@
 import enchant
-import sys
 import os
 
 """
@@ -29,12 +28,14 @@ points = [1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 4, 1, 3, 10, 1, 1, 1, 1, 4, 4, 
 #Creates a dictionary based on zipping lists: letters (key) and points(value)
 letter_to_points = {letter:points for letter, points in zip(letters, points)}
 
+
 #Initialize list that will contain input players
 players = []
 #Initialize dict that will keep track of each player's points
 player_to_points = {}
 #Initialize dict that will keep track of each word a player has played
 player_to_words = {}
+
 
 """
     Get number of players and player names based on user input.
@@ -69,6 +70,12 @@ def play_word(player):
 def validate_input(player):
     while True:
         word = input(f"{player}'s turn. Please input a word: ")
+        try:
+            if len(word) < 2:
+                raise InvalidInputError
+        except InvalidInputError:
+            print(f"Word must be at least 2 letters long. Try again, {player}!", end="\n\n")
+            continue
         not_alpha = False
         for letter in word:
             if not(letter.isalpha()):
@@ -254,26 +261,6 @@ def end_game():
         print(f"{winners[0]} wins!! Thanks for playing!")
 
 
-def another_game():
-    #//TODO clear previous game data
-    try:
-        print()
-        another_round_prompt = input("Would you like to play again? ").lower()
-        if another_round_prompt == "yes" or another_round_prompt == "y":
-            sys.stdin.flush()
-            os.system('clear')
-            start_game()
-        elif another_round_prompt == "no" or another_round_prompt == "n":
-            print()
-            print("Goodbye!")
-            return
-        else:
-            raise InvalidInputError(another_round_prompt)
-    except InvalidInputError:
-        print()
-        print("Please enter a valid response!", end = "\n\n")
-        another_game()
-
 """
     Checks if the input provided by the user to play another round is
     correct. If not, raise an InvalidInputError exception
@@ -294,11 +281,49 @@ def another_round():
         print("Please enter a valid response!", end = "\n\n")
         another_round()
 
+
+"""
+    Prompts user if they'd like to play another game. If yes, calls start_game(). If no,
+    says goodbye and ends the game.
+"""
+def another_game():
+    #//TODO clear previous game data
+    try:
+        print()
+        another_round_prompt = input("Would you like to play again? ").lower()
+        if another_round_prompt == "yes" or another_round_prompt == "y":
+            os.system('clear')
+            global players
+            del players
+            return True
+        elif another_round_prompt == "no" or another_round_prompt == "n":
+            print()
+            print("Goodbye!")
+            return False
+        else:
+            raise InvalidInputError(another_round_prompt)
+    except InvalidInputError:
+        print()
+        print("Please enter a valid response!")
+        another_game()
+
+
 """
     Starts the game.. 
         welcome banner, calls get_players() and welcomes, then calls play_round() to start the game
 """
 def start_game():
+
+    #Initialize list that will contain input players
+    global players
+    players = []
+    #Initialize dict that will keep track of each player's points
+    global player_to_points
+    player_to_points = {}
+    #Initialize dict that will keep track of each word a player has played
+    global player_to_words
+    player_to_words = {}
+
     print()
     print("""############################""")
     print("""Welcome to Scrabble Scorer!!""")
